@@ -3,25 +3,24 @@ import json
 import re
 import pandas as pd
 import scrapy
-
+from scrapy.http import Request
 
 class Soundcloud1Spider(scrapy.Spider):
     name = 'soundcloud_1'
 
     def __init__(self):
-        self.file_name = 'soundcloud.csv'
-    
-    start_urls = [
-        'https://soundcloud.com/petitbiscuit',
-        'https://soundcloud.com/flume',
-        'https://soundcloud.com/odezenne',
-        'https://soundcloud.com/rone-music',
-        'https://soundcloud.com/tonesandi-music',
-        'https://soundcloud.com/arizonazervas',
-        'https://soundcloud.com/dontoliver',
-        'https://soundcloud.com/thepixelbeatz',
-        'https://soundcloud.com/moleculesound',
-        ]
+
+        self.file_name = 'results/soundcloud.csv'
+
+
+    def start_requests(self):
+        try:
+            with open('profiles_to_parse.txt', 'r', encoding='utf-8') as f:
+                profiles = f.readlines()
+                for profile in profiles:
+                    yield Request(url=profile, callback=self.parse)
+        except FileNotFoundError:
+            print('Please provide profiles_to_parse.txt in the project folder')
 
     def parse(self, response):
         script = response.xpath('/html/body/script[9]/text()').get()
