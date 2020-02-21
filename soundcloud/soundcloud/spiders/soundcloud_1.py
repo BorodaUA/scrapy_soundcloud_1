@@ -24,12 +24,12 @@ class Soundcloud1Spider(scrapy.Spider):
 
     def parse(self, response):
         script = response.xpath('/html/body/script[9]/text()').get()
-        half = re.search('(?<=\{\}\}\)\}\,\[)(.*)(\]\}\]\)\;)', script).group(1)
-        almost = re.search('(\{\"avatar)(.*)(?=)', half).group(0)
+        half = re.search(r'(?<=\{\}\}\)\}\,\[)(.*)(\]\}\]\)\;)', script).group(1)
+        almost = re.search(r'(\{\"avatar)(.*)(?=)', half).group(0)
         clean_dict = json.loads(almost)
         try:
             half_desc = clean_dict['description'].strip().replace('\n','')
-            email_list = re.findall("[a-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\.[a-z0-9!#$%&'*+/=?^_`{|}~-]+)*@(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?", half_desc)  
+            email_list = re.findall(r"[a-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\.[a-z0-9!#$%&'*+/=?^_`{|}~-]+)*@(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?", half_desc)  
         except AttributeError:
             pass
         result_dict = {
@@ -51,6 +51,7 @@ class Soundcloud1Spider(scrapy.Spider):
                 new_df = pd.concat([file_df, df], axis=0, ignore_index=True, sort=False)
             else:
                 new_df = pd.concat([file_df, df], axis=0, ignore_index=True, sort=False)
+            new_df.drop_duplicates(inplace=True)
             new_df.to_csv(self.file_name, mode='w',header=True, index=None)               
         except FileNotFoundError:
             df.to_csv(self.file_name,mode='w', header=True, index=None)
